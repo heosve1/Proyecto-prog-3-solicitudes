@@ -13,3 +13,4 @@ export * from './solicitud.model';
 export * from './comite-solicitud.model';
 export * from './jurado-investigacion.model';
 export * from './departamento-proponente.model';
+export * from './recordatorio.model';
