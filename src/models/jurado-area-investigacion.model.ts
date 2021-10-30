@@ -18,7 +18,7 @@ import {Entity, model, property} from '@loopback/repository';
     },
   },
 })
-export class JuradoInvestigacion extends Entity {
+export class JuradoAreaInvestigacion extends Entity {
   @property({
     type: 'number',
     id: true,
@@ -29,20 +29,20 @@ export class JuradoInvestigacion extends Entity {
   @property({
     type: 'number',
   })
-  id_jurado?: number;
+  id_areainvestigacion?: number;
 
   @property({
     type: 'number',
   })
-  id_areainvestigacion?: number;
+  id_jurado?: number;
 
-  constructor(data?: Partial<JuradoInvestigacion>) {
+  constructor(data?: Partial<JuradoAreaInvestigacion>) {
     super(data);
   }
 }
 
-export interface JuradoInvestigacionRelations {
+export interface JuradoAreaInvestigacionRelations {
   // describe navigational properties here
 }
 
-export type JuradoInvestigacionWithRelations = JuradoInvestigacion & JuradoInvestigacionRelations;
+export type JuradoAreaInvestigacionWithRelations = JuradoAreaInvestigacion & JuradoAreaInvestigacionRelations;
