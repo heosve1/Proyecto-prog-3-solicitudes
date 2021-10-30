@@ -23,4 +23,9 @@ export * from './solicitud-tiposolicitud.controller';
 export * from './solicitud.controller';
 export * from './tiposolicitud.controller';
 export * from './tipovinculacion.controller';
-
+export * from './recordatorio-evaluacionsolicitud.controller';
+export * from './recordatorio.controller';
+export * from './usuariojurado.controller';
+export * from './usuarioproponente.controller';
+export * from './jurado-usuariojurado.controller';
+export * from './proponente-usuarioproponente.controller';

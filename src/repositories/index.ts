@@ -13,3 +13,6 @@ export * from './tipovinculacion.repository';
 export * from './comite-solicitud.repository';
 export * from './departamento-proponente.repository';
 export * from './jurado-investigacion.repository';
+export * from './recordatorio.repository';
+export * from './usuariojurado.repository';
+export * from './usuarioproponente.repository';

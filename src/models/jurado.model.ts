@@ -1,6 +1,7 @@
-import {Entity, model, property, hasMany} from '@loopback/repository';
+import {Entity, model, property, hasMany, hasOne} from '@loopback/repository';
 import {Areainvestigacion} from './areainvestigacion.model';
 import {JuradoInvestigacion} from './jurado-investigacion.model';
+import {Usuariojurado} from './usuariojurado.model';
 
 @model()
 export class Jurado extends Entity {
@@ -43,6 +44,9 @@ export class Jurado extends Entity {
 
   @hasMany(() => Areainvestigacion, {through: {model: () => JuradoInvestigacion, keyFrom: 'id_jurado', keyTo: 'id_areainvestigacion'}})
   areainvestigaciones: Areainvestigacion[];
+
+  @hasOne(() => Usuariojurado, {keyTo: 'id_jurado'})
+  tiene_un: Usuariojurado;
 
   constructor(data?: Partial<Jurado>) {
     super(data);
