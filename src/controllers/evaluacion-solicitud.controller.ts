@@ -159,7 +159,7 @@ export class EvaluacionSolicitudController {
 
         let notificacionJurado = new NotificacionCorreo();
         notificacionJurado.destinatario = jurado.correo;
-        notificacionJurado.asunto = "EvaluaciÃ³n Solicitud";
+        notificacionJurado.asunto = "Evaluacion Solicitud";
         notificacionJurado.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Has aceptado evaluar la solicitud del trabajo <strong>${solicitud.nombre_trabajo}</strong>, a nombre de ${proponente.primer_nombre} ${proponente.primer_apellido}. <br /> Para ir a la pagina de evaluacion, ingresa al siguiente link: <a href="https://tenor.com/view/bob-esponja-dancando-mt-gif-19768741">Evaluar</a><br /><br />Fecha:${evaluacionsolicitud.fecha_resultado}`
         this.servicioNotificaciones.EnviarCorreo(notificacionJurado)
         console.log("Se ha notificado al jurado con exito")
@@ -167,7 +167,28 @@ export class EvaluacionSolicitudController {
         let notificacionProponente = new NotificacionCorreo();
         notificacionProponente.destinatario = jurado.correo;
         notificacionProponente.asunto = "Solicitud Aceptada";
-        notificacionProponente.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${proponente.primer_nombre}</h1></strong><br /> Tu solicitud <strong>${solicitud.nombre_trabajo}</strong>, y sera evaluada por el jurado ${jurado.nombre} ${jurado.apellidos}.<br /> Se te notificara del proceso de evaluacion proximamente.`
+        notificacionProponente.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${proponente.primer_nombre}</h1></strong><br /> Tu solicitud <strong>${solicitud.nombre_trabajo}</strong>,ha sido aceptada y sera evaluada por el jurado ${jurado.nombre} ${jurado.apellidos}.<br /> Se te notificara del proceso de evaluacion proximamente.`
+        this.servicioNotificaciones.EnviarCorreo(notificacionProponente)
+        console.log("Se ha notificado al proponente con exito")
+      }
+
+    }
+
+    if (respuestaAntigua == "En proceso..." && respuestaNueva == "Rechazado") {
+
+      if (jurado && solicitud && proponente) {
+
+        let notificacionJurado = new NotificacionCorreo();
+        notificacionJurado.destinatario = jurado.correo;
+        notificacionJurado.asunto = "Evaluacion Solicitud";
+        notificacionJurado.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Has rechazado evaluar la solicitud del trabajo <strong>${solicitud.nombre_trabajo}</strong>, a nombre de ${proponente.primer_nombre} ${proponente.primer_apellido}. <br /> Lamentamos que no puedieras evaluar esta solicitud, esperamos encarecidamente que nos ayudes a evaluar futuras solicitudes.`
+        this.servicioNotificaciones.EnviarCorreo(notificacionJurado)
+        console.log("Se ha notificado al jurado con exito")
+
+        let notificacionProponente = new NotificacionCorreo();
+        notificacionProponente.destinatario = jurado.correo;
+        notificacionProponente.asunto = "Solicitud Rechazada";
+        notificacionProponente.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${proponente.primer_nombre}</h1></strong><br /> Tu solicitud <strong>${solicitud.nombre_trabajo}</strong>,fue rechazada por el jurado ${jurado.nombre} ${jurado.apellidos}.<br /> Se te notificara del proceso de evaluacion proximamente.`
         this.servicioNotificaciones.EnviarCorreo(notificacionProponente)
         console.log("Se ha notificado al proponente con exito")
       }
