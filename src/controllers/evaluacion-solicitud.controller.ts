@@ -13,7 +13,7 @@ import {
   response
 } from '@loopback/rest';
 import {Evaluacionsolicitud, NotificacionCorreo} from '../models';
-import {EvaluacionsolicitudRepository, JuradoRepository, SolicitudRepository} from '../repositories';
+import {EvaluacionsolicitudRepository, JuradoRepository, ProponenteRepository, SolicitudRepository} from '../repositories';
 import {NotificacionesService} from '../services';
 
 
@@ -27,6 +27,8 @@ export class EvaluacionSolicitudController {
     public servicioNotificaciones: NotificacionesService,
     @repository(SolicitudRepository)
     public solicitudRepository: SolicitudRepository,
+    @repository(ProponenteRepository)
+    public proponenteRepository: ProponenteRepository
 
   ) { }
 
@@ -144,6 +146,35 @@ export class EvaluacionSolicitudController {
     evaluacionsolicitud: Evaluacionsolicitud,
   ): Promise<void> {
     await this.evaluacionsolicitudRepository.updateById(id, evaluacionsolicitud);
+    let evaluacionsolicitud1 = await this.evaluacionsolicitudRepository.findById(id)
+    let respuestaAntigua = "En proceso..."
+    let respuestaNueva = evaluacionsolicitud1.respuesta
+    let jurado = await this.juradoRepository.findById(evaluacionsolicitud1.id_jurado);
+    let solicitud = await this.solicitudRepository.findById(evaluacionsolicitud1.id_solicitud);
+    let proponente = await this.proponenteRepository.findById(solicitud.id_proponente);
+
+    if (respuestaAntigua == "En proceso..." && respuestaNueva == "Aceptado") {
+
+      if (jurado && solicitud && proponente) {
+
+        let notificacionJurado = new NotificacionCorreo();
+        notificacionJurado.destinatario = jurado.correo;
+        notificacionJurado.asunto = "EvaluaciÃ³n Solicitud";
+        notificacionJurado.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Has aceptado evaluar la solicitud del trabajo <strong>${solicitud.nombre_trabajo}</strong>, a nombre de ${proponente.primer_nombre} ${proponente.primer_apellido}. <br /> Para ir a la pagina de evaluacion, ingresa al siguiente link: <a href="https://tenor.com/view/bob-esponja-dancando-mt-gif-19768741">Evaluar</a><br /><br />Fecha:${evaluacionsolicitud.fecha_resultado}`
+        this.servicioNotificaciones.EnviarCorreo(notificacionJurado)
+        console.log("Se ha notificado al jurado con exito")
+
+        let notificacionProponente = new NotificacionCorreo();
+        notificacionProponente.destinatario = jurado.correo;
+        notificacionProponente.asunto = "Solicitud Aceptada";
+        notificacionProponente.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${proponente.primer_nombre}</h1></strong><br /> Tu solicitud <strong>${solicitud.nombre_trabajo}</strong>, y sera evaluada por el jurado ${jurado.nombre} ${jurado.apellidos}.<br /> Se te notificara del proceso de evaluacion proximamente.`
+        this.servicioNotificaciones.EnviarCorreo(notificacionProponente)
+        console.log("Se ha notificado al proponente con exito")
+      }
+
+    }
+
+
   }
 
   @put('/evaluacionsolicitudes/{id}')
