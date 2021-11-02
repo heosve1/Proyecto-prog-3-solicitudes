@@ -16,3 +16,4 @@ export * from './recordatorio.model';
 export * from './usuariojurado.model';
 export * from './usuarioproponente.model';
 export * from './jurado-area-investigacion.model';
+export * from './notificacion-correo.model';

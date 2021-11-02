@@ -1,30 +1,30 @@
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
-  response,
+  del, get,
+  getModelSchemaRef, param, patch, post, put, requestBody,
+  response
 } from '@loopback/rest';
-import {Solicitud} from '../models';
-import {SolicitudRepository} from '../repositories';
+import {NotificacionCorreo, Solicitud} from '../models';
+import {ProponenteRepository, SolicitudRepository} from '../repositories';
+import {NotificacionesService} from '../services';
 
 export class SolicitudController {
   constructor(
+    @repository(ProponenteRepository)
+    public proponenteRepository: ProponenteRepository,
     @repository(SolicitudRepository)
-    public solicitudRepository : SolicitudRepository,
-  ) {}
+    public solicitudRepository: SolicitudRepository,
+    @service(NotificacionesService)
+    public servicioNotificaciones: NotificacionesService
+  ) { }
 
   @post('/solicitudes')
   @response(200, {
@@ -44,7 +44,17 @@ export class SolicitudController {
     })
     solicitud: Omit<Solicitud, 'id'>,
   ): Promise<Solicitud> {
+    let proponente = await this.proponenteRepository.findById(solicitud.id_proponente);
+    if (proponente) {
+      let notificacion = new NotificacionCorreo();
+      notificacion.destinatario = proponente.correo;
+      notificacion.asunto = "Envio Solicitud";
+      notificacion.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${proponente.primer_nombre}</h1></strong><br /> Su trabajo <strong>${solicitud.nombre_trabajo}</strong>, se ha subido a la plataforma con exito. <br /> Será notificado con actualizaciones proximamente.<br /><br />Fecha:${solicitud.fecha}`
+      this.servicioNotificaciones.EnviarCorreo(notificacion)
+      console.log("Se ha notificado al usuario con exito")
+    }
     return this.solicitudRepository.create(solicitud);
+
   }
 
   @get('/solicitudes/count')

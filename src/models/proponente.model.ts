@@ -1,4 +1,4 @@
-import {belongsTo, Entity, model, property, hasOne} from '@loopback/repository';
+import {belongsTo, Entity, hasOne, model, property} from '@loopback/repository';
 import {Tipovinculacion} from './tipovinculacion.model';
 import {Usuarioproponente} from './usuarioproponente.model';
 

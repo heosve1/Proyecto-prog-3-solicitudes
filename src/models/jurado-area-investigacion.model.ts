@@ -3,14 +3,14 @@ import {Entity, model, property} from '@loopback/repository';
 @model({
   settings: {
     foreignKeys: {
-      fk_id_areainvestigacion: {
-        name: 'fk_id_areainvestigacion',
+      fk_id_areainvestigacion44: {
+        name: 'fk_id_areainvestigacion44',
         entity: 'Areainvestigacion',
         entityKey: 'id',
         foreignKey: 'id_areainvestigacion',
       },
-      fk_id_jurado2: {
-        name: 'fk_id_jurado2',
+      fk_id_jurado22: {
+        name: 'fk_id_jurado22',
         entity: 'Jurado',
         entityKey: 'id',
         foreignKey: 'id_jurado',
