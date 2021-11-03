@@ -13,7 +13,7 @@ import {
   response
 } from '@loopback/rest';
 import {Evaluacionsolicitud, NotificacionCorreo} from '../models';
-import {EvaluacionsolicitudRepository, JuradoRepository, ProponenteRepository, SolicitudRepository} from '../repositories';
+import {ArchivoRepository, EvaluacionsolicitudRepository, JuradoRepository, ProponenteRepository, SolicitudRepository} from '../repositories';
 import {NotificacionesService} from '../services';
 
 
@@ -28,7 +28,9 @@ export class EvaluacionSolicitudController {
     @repository(SolicitudRepository)
     public solicitudRepository: SolicitudRepository,
     @repository(ProponenteRepository)
-    public proponenteRepository: ProponenteRepository
+    public proponenteRepository: ProponenteRepository,
+    @repository(ProponenteRepository)
+    public archivoRepository: ArchivoRepository
 
   ) { }
 
@@ -51,7 +53,7 @@ export class EvaluacionSolicitudController {
     evaluacionsolicitud: Omit<Evaluacionsolicitud, 'id'>,
   ): Promise<Evaluacionsolicitud> {
     let jurado = await this.juradoRepository.findById(evaluacionsolicitud.id_jurado);
-    let solicitud = await this.solicitudRepository.findById(evaluacionsolicitud.id_solicitud);
+    let solicitud = await this.solicitudRepository.findById(evaluacionsolicitud.id_solicitud)
     if (jurado && solicitud) {
       let notificacion = new NotificacionCorreo();
       notificacion.destinatario = jurado.correo;
@@ -150,16 +152,22 @@ export class EvaluacionSolicitudController {
     let respuestaAntigua = "En proceso..."
     let respuestaNueva = evaluacionsolicitud1.respuesta
     let jurado = await this.juradoRepository.findById(evaluacionsolicitud1.id_jurado);
+    console.log(jurado.nombre)
     let solicitud = await this.solicitudRepository.findById(evaluacionsolicitud1.id_solicitud);
+    console.log(solicitud.nombre_trabajo)
     let proponente = await this.proponenteRepository.findById(solicitud.id_proponente);
+    console.log(proponente.primer_nombre)
+    let archivo = await this.archivoRepository.findById(evaluacionsolicitud1.id_solicitud)
+    console.log(archivo.nombre)
 
-    if (respuestaAntigua == "En proceso..." && respuestaNueva == "Aceptado") {
+
+    if ((respuestaAntigua == "En proceso...") && (respuestaNueva == "Aceptado")) {
 
       if (jurado && solicitud && proponente) {
         let notificacionJurado = new NotificacionCorreo();
         notificacionJurado.destinatario = jurado.correo;
         notificacionJurado.asunto = "Evaluacion Solicitud";
-        notificacionJurado.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Has aceptado evaluar la solicitud del trabajo <strong>${solicitud.nombre_trabajo}</strong>, a nombre de ${proponente.primer_nombre} ${proponente.primer_apellido}. <br /> Para ir a la pagina de evaluacion, ingresa al siguiente link: <a href="https://tenor.com/view/bob-esponja-dancando-mt-gif-19768741">Evaluar</a><br /><br />Fecha:${evaluacionsolicitud.fecha_resultado}`
+        notificacionJurado.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Has aceptado evaluar la solicitud del trabajo <strong>${solicitud.nombre_trabajo}</strong>, a nombre de ${proponente.primer_nombre} ${proponente.primer_apellido}. <br /> Para ir a la pagina de evaluacion, ingresa al siguiente link: <a href="https://tenor.com/view/bob-esponja-dancando-mt-gif-19768741">Evaluar</a><br /><br />Fecha:${evaluacionsolicitud.fecha_resultado}<br /> Adjuntamos Archivo ${archivo.nombre}`
         this.servicioNotificaciones.EnviarCorreo(notificacionJurado)
         console.log("Se ha notificado al jurado con exito")
 
@@ -173,7 +181,7 @@ export class EvaluacionSolicitudController {
 
     }
 
-    if (respuestaAntigua == "En proceso..." && respuestaNueva == "Rechazado") {
+    if ((respuestaAntigua == "En proceso...") && (respuestaNueva == "Rechazado")) {
 
       if (jurado && solicitud && proponente) {
 

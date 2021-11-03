@@ -1,6 +1,7 @@
-import {belongsTo, Entity, hasOne, model, property} from '@loopback/repository';
+import {belongsTo, Entity, hasOne, model, property, hasMany} from '@loopback/repository';
 import {Tipovinculacion} from './tipovinculacion.model';
 import {Usuarioproponente} from './usuarioproponente.model';
+import {Foto} from './foto.model';
 
 @model({
   settings: {
@@ -75,6 +76,9 @@ export class Proponente extends Entity {
 
   @hasOne(() => Usuarioproponente, {keyTo: 'id_proponente'})
   tiene_un: Usuarioproponente;
+
+  @hasMany(() => Foto, {keyTo: 'id_proponente'})
+  tiene_foto: Foto[];
 
   constructor(data?: Partial<Proponente>) {
     super(data);

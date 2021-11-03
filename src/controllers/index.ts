@@ -34,3 +34,5 @@ export * from './recordatorio-resultadosolicitud.controller';
 export * from './descargaarchivos.controller';
 export * from './foto-proponente.controller';
 export * from './archivo-solicitud.controller';
+export * from './proponente-foto.controller';
+export * from './evaluacionsolicitud-archivo.controller';

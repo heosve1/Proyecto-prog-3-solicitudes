@@ -15,14 +15,17 @@ import {
 import multer from 'multer';
 import path from 'path';
 import {Keys as llaves} from '../config/keys';
-import {Proponente} from '../models';
-import {ProponenteRepository} from '../repositories';
+import {Archivo, Foto} from '../models';
+import {ArchivoRepository, FotoRepository} from '../repositories';
 
 
 export class CargaArchivosController {
   constructor(
-    @repository(ProponenteRepository)
-    private proponenteRepository = ProponenteRepository
+    @repository(FotoRepository)
+    private fotoRepository: FotoRepository,
+    @repository(ArchivoRepository)
+    private archivoRepository: ArchivoRepository
+
   ) { }
 
 
@@ -51,9 +54,10 @@ export class CargaArchivosController {
     if (res) {
       const nombre_archivo = response.req?.file?.filename;
       if (nombre_archivo) {
-        let foto = new Proponente();
-        foto.id=id
-        foto.fotografia = nombre_archivo;
+        let foto = new Foto()
+        foto.id_proponente = id
+        foto.nombre = nombre_archivo
+        await this.fotoRepository.save(foto);
         return {filename: nombre_archivo};
       }
     }
@@ -65,7 +69,7 @@ export class CargaArchivosController {
    * @param response
    * @param request
    */
-  @post('/CargarDocumentoPersona', {
+  @post('/CargarDocumentoPersona/{id_solicitud}', {
     responses: {
       200: {
         content: {
@@ -82,13 +86,17 @@ export class CargaArchivosController {
   async DocumentosPersona(
     @inject(RestBindings.Http.RESPONSE) response: Response,
     @requestBody.file() request: Request,
+    @param.path.number("id_solicitud") id: number
   ): Promise<object | false> {
     const rutaDocumentoPersona = path.join(__dirname, llaves.carpetaDocumentoSolicitud);
     let res = await this.StoreFileToPath(rutaDocumentoPersona, llaves.nombreCampoDocumentoProponente, request, response, llaves.extensionesPermitidasDOC);
     if (res) {
       const nombre_archivo = response.req?.file?.filename;
       if (nombre_archivo) {
-        
+        let archivo = new Archivo()
+        archivo.id_solicitud = id
+        archivo.nombre = nombre_archivo
+        await this.archivoRepository.save(archivo);
         return {filename: nombre_archivo};
       }
     }
