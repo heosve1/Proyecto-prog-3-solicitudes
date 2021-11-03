@@ -17,3 +17,5 @@ export * from './usuariojurado.model';
 export * from './usuarioproponente.model';
 export * from './jurado-area-investigacion.model';
 export * from './notificacion-correo.model';
+export * from './foto.model';
+export * from './archivo.model';

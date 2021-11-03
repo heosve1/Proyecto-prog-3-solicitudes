@@ -22,7 +22,7 @@ import {ProponenteRepository} from '../repositories';
 export class CargaArchivosController {
   constructor(
     @repository(ProponenteRepository)
-    public proponenteRepository = ProponenteRepository
+    private proponenteRepository = ProponenteRepository
   ) { }
 
 
@@ -52,6 +52,7 @@ export class CargaArchivosController {
       const nombre_archivo = response.req?.file?.filename;
       if (nombre_archivo) {
         let foto = new Proponente();
+        foto.id=id
         foto.fotografia = nombre_archivo;
         return {filename: nombre_archivo};
       }
@@ -82,11 +83,12 @@ export class CargaArchivosController {
     @inject(RestBindings.Http.RESPONSE) response: Response,
     @requestBody.file() request: Request,
   ): Promise<object | false> {
-    const rutaDocumentoPersona = path.join(__dirname, llaves.carpetaDocumentoProponente);
+    const rutaDocumentoPersona = path.join(__dirname, llaves.carpetaDocumentoSolicitud);
     let res = await this.StoreFileToPath(rutaDocumentoPersona, llaves.nombreCampoDocumentoProponente, request, response, llaves.extensionesPermitidasDOC);
     if (res) {
       const nombre_archivo = response.req?.file?.filename;
       if (nombre_archivo) {
+        
         return {filename: nombre_archivo};
       }
     }

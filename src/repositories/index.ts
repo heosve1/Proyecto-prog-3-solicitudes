@@ -16,3 +16,5 @@ export * from './recordatorio.repository';
 export * from './usuariojurado.repository';
 export * from './usuarioproponente.repository';
 export * from './jurado-area-investigacion.repository';
+export * from './archivo.repository';
+export * from './foto.repository';

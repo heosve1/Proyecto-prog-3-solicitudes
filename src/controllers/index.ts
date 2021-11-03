@@ -31,3 +31,6 @@ export * from './proponente-usuarioproponente.controller';
 export * from './areainvestigacion-jurado.controller';
 export * from './carga-archivos.controller';
 export * from './recordatorio-resultadosolicitud.controller';
+export * from './descargaarchivos.controller';
+export * from './foto-proponente.controller';
+export * from './archivo-solicitud.controller';
