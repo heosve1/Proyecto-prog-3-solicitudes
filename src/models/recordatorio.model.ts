@@ -1,5 +1,6 @@
 import {belongsTo, Entity, model, property} from '@loopback/repository';
 import {Evaluacionsolicitud} from './evaluacionsolicitud.model';
+import {Resultadosolicitud} from './resultadosolicitud.model';
 
 @model({
   settings: {
@@ -9,6 +10,12 @@ import {Evaluacionsolicitud} from './evaluacionsolicitud.model';
         entity: 'Evaluacionsolicitud',
         entityKey: 'id',
         foreignKey: 'id_evaluacionsolicitud',
+      },
+      fk_id_solicitud_resultado2: {
+        name: 'fk_id_solicitud_resultado2',
+        entity: 'Resultadosolicitud',
+        entityKey: 'id',
+        foreignKey: 'id_resultadosolicitud',
       },
     },
   },
@@ -47,6 +54,9 @@ export class Recordatorio extends Entity {
 
   @belongsTo(() => Evaluacionsolicitud, {name: 'tiene_evaluacionsolicitud'})
   id_evaluacionsolicitud: number;
+
+  @belongsTo(() => Resultadosolicitud, {name: 'tiene_resultadosolicitud'})
+  id_resultadosolicitud: number;
 
   constructor(data?: Partial<Recordatorio>) {
     super(data);
