@@ -1,30 +1,36 @@
+import {service} from '@loopback/core';
 import {
   Count,
   CountSchema,
   Filter,
   FilterExcludingWhere,
   repository,
-  Where,
+  Where
 } from '@loopback/repository';
 import {
-  post,
-  param,
-  get,
-  getModelSchemaRef,
-  patch,
-  put,
-  del,
-  requestBody,
-  response,
+  del, get,
+  getModelSchemaRef, param, patch, post, put, requestBody,
+  response
 } from '@loopback/rest';
-import {Resultadosolicitud} from '../models';
-import {ResultadosolicitudRepository} from '../repositories';
+import {NotificacionCorreo, Resultadosolicitud} from '../models';
+import {EvaluacionsolicitudRepository, JuradoRepository, ProponenteRepository, ResultadosolicitudRepository, SolicitudRepository} from '../repositories';
+import {NotificacionesService} from '../services';
 
 export class ResultadoSolicitudController {
   constructor(
     @repository(ResultadosolicitudRepository)
-    public resultadosolicitudRepository : ResultadosolicitudRepository,
-  ) {}
+    public resultadosolicitudRepository: ResultadosolicitudRepository,
+    @repository(ProponenteRepository)
+    public proponenteRepository: ProponenteRepository,
+    @repository(SolicitudRepository)
+    public solicitudRepository: SolicitudRepository,
+    @repository(EvaluacionsolicitudRepository)
+    public evaluacionRepository: EvaluacionsolicitudRepository,
+    @repository(JuradoRepository)
+    public juradoreRepository: JuradoRepository,
+    @service(NotificacionesService)
+    public servicioNotificaciones: NotificacionesService
+  ) { }
 
   @post('/resultadosolicitudes')
   @response(200, {
@@ -44,6 +50,26 @@ export class ResultadoSolicitudController {
     })
     resultadosolicitud: Omit<Resultadosolicitud, 'id'>,
   ): Promise<Resultadosolicitud> {
+    let Evaluacionsolicitud = await this.evaluacionRepository.findById(resultadosolicitud.id_evaluacionsolicitud);
+    let jurado = await this.juradoreRepository.findById(Evaluacionsolicitud.id_jurado);
+    let solicitud = await this.solicitudRepository.findById(Evaluacionsolicitud.id_solicitud);
+    let proponente = await this.proponenteRepository.findById(solicitud.id_proponente)
+
+    if (Evaluacionsolicitud && jurado && solicitud && proponente) {
+      let notificacionJurado = new NotificacionCorreo();
+      notificacionJurado.destinatario = jurado.correo;
+      notificacionJurado.asunto = "Evaluacion Solicitud";
+      notificacionJurado.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Has Calificado el trabajo <strong>${solicitud.nombre_trabajo}</strong>, a nombre de ${proponente.primer_nombre} ${proponente.primer_apellido}.`
+      this.servicioNotificaciones.EnviarCorreo(notificacionJurado)
+      console.log("Se ha notificado al jurado con exito")
+
+      let notificacionProponente = new NotificacionCorreo();
+      notificacionProponente.destinatario = jurado.correo;
+      notificacionProponente.asunto = "Resultado Solicitud";
+      notificacionProponente.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${proponente.primer_nombre}</h1></strong><br /> Tu solicitud <strong>${solicitud.nombre_trabajo}</strong>, a sido califcado por  ${jurado.nombre} ${jurado.apellidos}.<br /> Tu nota a sido ${resultadosolicitud.resultado}.`
+      this.servicioNotificaciones.EnviarCorreo(notificacionProponente)
+      console.log("Se ha notificado al proponente con exito")
+    }
     return this.resultadosolicitudRepository.create(resultadosolicitud);
   }
 

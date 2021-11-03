@@ -13,7 +13,7 @@ import {
   response
 } from '@loopback/rest';
 import {NotificacionCorreo, Solicitud} from '../models';
-import {ProponenteRepository, SolicitudRepository} from '../repositories';
+import {ProponenteRepository, SolicitudRepository,EvaluacionsolicitudRepository} from '../repositories';
 import {NotificacionesService} from '../services';
 
 export class SolicitudController {
@@ -22,6 +22,8 @@ export class SolicitudController {
     public proponenteRepository: ProponenteRepository,
     @repository(SolicitudRepository)
     public solicitudRepository: SolicitudRepository,
+    @repository(SolicitudRepository)
+    public evaluacionsolicitudRepository: EvaluacionsolicitudRepository,
     @service(NotificacionesService)
     public servicioNotificaciones: NotificacionesService
   ) { }

@@ -29,3 +29,4 @@ export * from './usuarioproponente.controller';
 export * from './jurado-usuariojurado.controller';
 export * from './proponente-usuarioproponente.controller';
 export * from './areainvestigacion-jurado.controller';
+export * from './carga-archivos.controller';
