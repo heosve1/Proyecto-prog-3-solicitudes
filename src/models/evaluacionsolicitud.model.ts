@@ -1,5 +1,4 @@
 import {belongsTo, Entity, model, property} from '@loopback/repository';
-import {Archivo} from './archivo.model';
 import {Jurado} from './jurado.model';
 import {Solicitud} from './solicitud.model';
 
@@ -17,12 +16,6 @@ import {Solicitud} from './solicitud.model';
         entity: 'Solicitud',
         entityKey: 'id',
         foreignKey: 'id_solicitud',
-      },
-      fk_id_archivo: {
-        name: 'fk_id_archivo',
-        entity: 'Archivo',
-        entityKey: 'id',
-        foreignKey: 'id_archivo',
       }
     }
   }
@@ -65,9 +58,6 @@ export class Evaluacionsolicitud extends Entity {
 
   @belongsTo(() => Solicitud, {name: 'tiene_solicitud'})
   id_solicitud: number;
-
-  @belongsTo(() => Archivo, {name: 'tiene_archivo'})
-  id_archivo: number;
 
   constructor(data?: Partial<Evaluacionsolicitud>) {
     super(data);

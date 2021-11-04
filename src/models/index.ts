@@ -19,3 +19,4 @@ export * from './jurado-area-investigacion.model';
 export * from './notificacion-correo.model';
 export * from './foto.model';
 export * from './archivo.model';
+export * from './llamadas.model';

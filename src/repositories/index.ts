@@ -18,3 +18,4 @@ export * from './usuarioproponente.repository';
 export * from './jurado-area-investigacion.repository';
 export * from './archivo.repository';
 export * from './foto.repository';
+export * from './llamadas.repository';
