@@ -13,7 +13,7 @@ import {
   response
 } from '@loopback/rest';
 import {NotificacionCorreo, Solicitud} from '../models';
-import {ProponenteRepository, SolicitudRepository,EvaluacionsolicitudRepository} from '../repositories';
+import {EvaluacionsolicitudRepository, ProponenteRepository, SolicitudRepository} from '../repositories';
 import {NotificacionesService} from '../services';
 
 export class SolicitudController {
@@ -87,6 +87,7 @@ export class SolicitudController {
   ): Promise<Solicitud[]> {
     return this.solicitudRepository.find(filter);
   }
+
 
   @patch('/solicitudes')
   @response(200, {

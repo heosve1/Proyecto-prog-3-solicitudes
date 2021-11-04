@@ -6,4 +6,8 @@ export namespace Keys {
   export const carpetaDocumentoSolicitud = '../../archivos/documentos';
   export const nombreCampoDocumentoProponente = 'file';
   export const extensionesPermitidasDOC: string[] = ['.PDF', '.DOC', '.DOCX', '.XLS', '.XLSX'];
+  export const rol_administrador = "617d91115545832a9cf4af31";
+  export const url_validar_token = "http://localhost:5001/validar-token"
+  export const arg_token = "token"
+  export const arg_rol_token = "rol"
 }

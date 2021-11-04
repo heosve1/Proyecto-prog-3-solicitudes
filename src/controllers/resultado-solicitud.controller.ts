@@ -9,7 +9,7 @@ import {
 } from '@loopback/repository';
 import {
   del, get,
-  getModelSchemaRef, param, patch, post, put, requestBody,
+  getModelSchemaRef, HttpErrors, param, patch, post, put, requestBody,
   response
 } from '@loopback/rest';
 import {NotificacionCorreo, Resultadosolicitud} from '../models';
@@ -55,22 +55,29 @@ export class ResultadoSolicitudController {
     let solicitud = await this.solicitudRepository.findById(Evaluacionsolicitud.id_solicitud);
     let proponente = await this.proponenteRepository.findById(solicitud.id_proponente)
 
-    if (Evaluacionsolicitud && jurado && solicitud && proponente) {
-      let notificacionJurado = new NotificacionCorreo();
-      notificacionJurado.destinatario = jurado.correo;
-      notificacionJurado.asunto = "Evaluacion Solicitud";
-      notificacionJurado.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Has Calificado el trabajo <strong>${solicitud.nombre_trabajo}</strong>, a nombre de ${proponente.primer_nombre} ${proponente.primer_apellido}.`
-      this.servicioNotificaciones.EnviarCorreo(notificacionJurado)
-      console.log("Se ha notificado al jurado con exito")
-
-      let notificacionProponente = new NotificacionCorreo();
-      notificacionProponente.destinatario = jurado.correo;
-      notificacionProponente.asunto = "Resultado Solicitud";
-      notificacionProponente.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${proponente.primer_nombre}</h1></strong><br /> Tu solicitud <strong>${solicitud.nombre_trabajo}</strong>, a sido califcado por  ${jurado.nombre} ${jurado.apellidos}.<br /> Tu nota a sido ${resultadosolicitud.resultado}.`
-      this.servicioNotificaciones.EnviarCorreo(notificacionProponente)
-      console.log("Se ha notificado al proponente con exito")
+    if (Evaluacionsolicitud.respuesta == "Rechazado") {
+      throw new HttpErrors[401]('El resultado que intenta ingresar fue rechazado previamente');
     }
-    return this.resultadosolicitudRepository.create(resultadosolicitud);
+    if ((resultadosolicitud.resultado == "Aceptado") || (resultadosolicitud.resultado == "Rechazado")) {
+      if (Evaluacionsolicitud && jurado && solicitud && proponente) {
+        let notificacionJurado = new NotificacionCorreo();
+        notificacionJurado.destinatario = jurado.correo;
+        notificacionJurado.asunto = "Evaluacion Solicitud";
+        notificacionJurado.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Has Calificado el trabajo <strong>${solicitud.nombre_trabajo}</strong>, a nombre de ${proponente.primer_nombre} ${proponente.primer_apellido}.`
+        this.servicioNotificaciones.EnviarCorreo(notificacionJurado)
+        console.log("Se ha notificado al jurado con exito")
+
+        let notificacionProponente = new NotificacionCorreo();
+        notificacionProponente.destinatario = jurado.correo;
+        notificacionProponente.asunto = "Resultado Solicitud";
+        notificacionProponente.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${proponente.primer_nombre}</h1></strong><br /> Tu solicitud <strong>${solicitud.nombre_trabajo}</strong>, a sido califcado por  ${jurado.nombre} ${jurado.apellidos}.<br /> Tu resultado ha sido ${resultadosolicitud.resultado}.`
+        this.servicioNotificaciones.EnviarCorreo(notificacionProponente)
+        console.log("Se ha notificado al proponente con exito")
+
+      }
+    }
+    return this.resultadosolicitudRepository.create(resultadosolicitud)
+
   }
 
   @get('/resultadosolicitudes/count')
@@ -102,6 +109,42 @@ export class ResultadoSolicitudController {
     return this.resultadosolicitudRepository.find(filter);
   }
 
+  @get('/resultadosolicitudes-aceptadas')
+  @response(200, {
+    description: 'Array of Resultadosolicitud model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(Resultadosolicitud, {includeRelations: true}),
+        },
+      },
+    },
+  })
+  async encontrarAceptadas(
+    @param.filter(Resultadosolicitud) filter?: Filter<Resultadosolicitud>,
+  ): Promise<Resultadosolicitud[]> {
+    return this.resultadosolicitudRepository.find({where: {resultado: "Aceptado"}});
+  }
+
+  @get('/resultadosolicitudes-en-espera')
+  @response(200, {
+    description: 'Array of Resultadosolicitud model instances',
+    content: {
+      'application/json': {
+        schema: {
+          type: 'array',
+          items: getModelSchemaRef(Resultadosolicitud, {includeRelations: true}),
+        },
+      },
+    },
+  })
+  async encontrarEnEspera(
+    @param.filter(Resultadosolicitud) filter?: Filter<Resultadosolicitud>,
+  ): Promise<Resultadosolicitud[]> {
+    return this.resultadosolicitudRepository.find({where: {resultado: "En espera..."}});
+  }
+
   @patch('/resultadosolicitudes')
   @response(200, {
     description: 'Resultadosolicitud PATCH success count',
@@ -118,6 +161,7 @@ export class ResultadoSolicitudController {
     resultadosolicitud: Resultadosolicitud,
     @param.where(Resultadosolicitud) where?: Where<Resultadosolicitud>,
   ): Promise<Count> {
+
     return this.resultadosolicitudRepository.updateAll(resultadosolicitud, where);
   }
 
@@ -152,7 +196,33 @@ export class ResultadoSolicitudController {
     })
     resultadosolicitud: Resultadosolicitud,
   ): Promise<void> {
+    let resultadosolicitudAntiguo = await this.resultadosolicitudRepository.findById(id)
     await this.resultadosolicitudRepository.updateById(id, resultadosolicitud);
+    if (resultadosolicitudAntiguo.resultado == "En espera...") {
+      let resultadosolicitud1 = await this.resultadosolicitudRepository.findById(id)
+      let Evaluacionsolicitud = await this.evaluacionRepository.findById(resultadosolicitud1.id_evaluacionsolicitud);
+      let jurado = await this.juradoreRepository.findById(Evaluacionsolicitud.id_jurado);
+      let solicitud = await this.solicitudRepository.findById(Evaluacionsolicitud.id_solicitud);
+      let proponente = await this.proponenteRepository.findById(solicitud.id_proponente)
+
+      if ((resultadosolicitud1.resultado == "Aceptado") || (resultadosolicitud1.resultado == "Rechazado")) {
+        if (Evaluacionsolicitud && jurado && solicitud && proponente) {
+          let notificacionJurado = new NotificacionCorreo();
+          notificacionJurado.destinatario = jurado.correo;
+          notificacionJurado.asunto = "Evaluacion Solicitud";
+          notificacionJurado.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Has Calificado el trabajo <strong>${solicitud.nombre_trabajo}</strong>, a nombre de ${proponente.primer_nombre} ${proponente.primer_apellido}.`
+          this.servicioNotificaciones.EnviarCorreo(notificacionJurado)
+          console.log("Se ha notificado al jurado con exito")
+
+          let notificacionProponente = new NotificacionCorreo();
+          notificacionProponente.destinatario = jurado.correo;
+          notificacionProponente.asunto = "Resultado Solicitud";
+          notificacionProponente.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${proponente.primer_nombre}</h1></strong><br /> Tu solicitud <strong>${solicitud.nombre_trabajo}</strong>, a sido califcado por  ${jurado.nombre} ${jurado.apellidos}.<br /> Tu resultado ha sido ${resultadosolicitud.resultado}.`
+          this.servicioNotificaciones.EnviarCorreo(notificacionProponente)
+          console.log("Se ha notificado al proponente con exito")
+        }
+      }
+    }
   }
 
   @put('/resultadosolicitudes/{id}')

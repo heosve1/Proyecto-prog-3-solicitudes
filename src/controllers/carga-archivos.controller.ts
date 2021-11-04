@@ -69,7 +69,7 @@ export class CargaArchivosController {
    * @param response
    * @param request
    */
-  @post('/CargarDocumentoPersona/{id_solicitud}', {
+  @post('/CargarArchivoSolicitud/{id_solicitud}', {
     responses: {
       200: {
         content: {
@@ -79,7 +79,7 @@ export class CargaArchivosController {
             },
           },
         },
-        description: 'Función de carga de documentos de la persona.',
+        description: 'Función de carga de archivos a la solicitud.',
       },
     },
   })
