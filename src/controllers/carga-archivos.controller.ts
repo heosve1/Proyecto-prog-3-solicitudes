@@ -64,6 +64,39 @@ export class CargaArchivosController {
     return res;
   }
 
+
+
+
+
+  @post('/CargarFotografiaProponente', {
+    responses: {
+      200: {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+            },
+          },
+        },
+        description: 'Función de carga de la fotografia de la persona.',
+      },
+    },
+  })
+  async cargarFotografiaProponente(
+    @inject(RestBindings.Http.RESPONSE) response: Response,
+    @requestBody.file() request: Request,
+  ): Promise<object | false> {
+    const rutaImagenProponente = path.join(__dirname, llaves.carpetaImagenProponente);
+    let res = await this.StoreFileToPath(rutaImagenProponente, llaves.nombreCampoImagenProponente, request, response, llaves.extensionesPermitidasIMG);
+    if (res) {
+      const nombre_archivo = response.req?.file?.filename;
+      if (nombre_archivo) {
+        return {filename: nombre_archivo};
+      }
+    }
+    return res;
+  }
+
   /**
    *
    * @param response
