@@ -36,13 +36,13 @@ export class Evaluacionsolicitud extends Entity {
   respuesta: string;
 
   @property({
-    type: 'date',
+    type: 'string',
     required: true,
   })
   fecha_invitacion: string;
 
   @property({
-    type: 'date',
+    type: 'string',
     required: true,
   })
   fecha_resultado: string;

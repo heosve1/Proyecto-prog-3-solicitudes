@@ -14,7 +14,6 @@ import {
 } from '@loopback/rest';
 import {Jurado} from '../models';
 import {JuradoRepository} from '../repositories';
-@authenticate("admin")
 export class JuradoController {
   constructor(
     @repository(JuradoRepository)
