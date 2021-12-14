@@ -50,15 +50,20 @@ export class EvaluacionSolicitudController {
     })
     evaluacionsolicitud: Omit<Evaluacionsolicitud, 'id'>,
   ): Promise<Evaluacionsolicitud> {
-    let jurado = await this.juradoRepository.findById(evaluacionsolicitud.id_jurado);
-    let solicitud = await this.solicitudRepository.findById(evaluacionsolicitud.id_solicitud);
-    if (jurado && solicitud) {
-      let notificacion = new NotificacionCorreo();
-      notificacion.destinatario = jurado.correo;
-      notificacion.asunto = "Invitación Solicitud";
-      notificacion.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Se te ha hecho la solicitud de evaluar el trabajo <strong>${solicitud.nombre_trabajo}</strong>. <br /> Para aceptar evaluar este trabajo, ingresa al siguiente link: <a href="https://www.ucaldas.edu.co/portal/">Aceptar</a><br />Si deseas rechazar la evaluación, ingresa al siguiente link: <a href="https://tenor.com/view/shitpost-gun-gif-21896048">Rechazar</a> <br />Fecha:${solicitud.fecha}`
-      this.servicioNotificaciones.EnviarCorreo(notificacion)
-      console.log("Se ha notificado al usuario con exito")
+     let jurado = await this.juradoRepository.findById(evaluacionsolicitud.id_jurado);
+     let solicitud = await this.solicitudRepository.findById(evaluacionsolicitud.id_solicitud);
+     if (jurado && solicitud) {
+       let notificacion = new NotificacionCorreo();
+       notificacion.destinatario = jurado.correo;
+       notificacion.asunto = "Invitación Solicitud";
+       notificacion.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Se te ha hecho la solicitud de evaluar el trabajo <strong>${solicitud.nombre_trabajo}</strong>. <br /> Para aceptar evaluar este trabajo, ingresa al siguiente link: <a href="http://localhost:4200/respuesta-jurado/hash">Aceptar</a><br />Si deseas rechazar la evaluación, ingresa al siguiente link: <a href="https://tenor.com/view/shitpost-gun-gif-21896048">Rechazar</a> <br />Fecha:${solicitud.fecha}`
+       this.servicioNotificaciones.EnviarCorreo(notificacion)
+       console.log("Se ha notificado al usuario con exito")
+     }
+    if (evaluacionsolicitud.Hash == "") {
+      let createHash = require('hash-generator');
+      evaluacionsolicitud.Hash = createHash(33)
+      console.log(evaluacionsolicitud.Hash)
     }
     return this.evaluacionsolicitudRepository.create(evaluacionsolicitud);
   }
@@ -136,6 +141,7 @@ export class EvaluacionSolicitudController {
   })
   async updateById(
     @param.path.number('id') id: number,
+    @param.path.string('hash') Hash: String,
     @requestBody({
       content: {
         'application/json': {
