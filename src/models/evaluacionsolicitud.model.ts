@@ -1,5 +1,4 @@
 import {belongsTo, Entity, model, property} from '@loopback/repository';
-import {generateKeyPair, generateKeyPairSync} from 'crypto';
 import {Jurado} from './jurado.model';
 import {Solicitud} from './solicitud.model';
 
@@ -58,7 +57,7 @@ export class Evaluacionsolicitud extends Entity {
     type: 'string',
     required: true,
   })
-  Hash:string;
+  Hash?: string;
 
   @belongsTo(() => Jurado, {name: 'tiene_jurado'})
   id_jurado: number;
