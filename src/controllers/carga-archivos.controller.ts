@@ -166,6 +166,35 @@ export class CargaArchivosController {
   }
 
 
+  @post('/CargarArchivoFormato', {
+    responses: {
+      200: {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+            },
+          },
+        },
+        description: 'Función de carga de Formato.',
+      },
+    },
+  })
+  async FormatoArchivoPersona(
+    @inject(RestBindings.Http.RESPONSE) response: Response,
+    @requestBody.file() request: Request,
+  ): Promise<object | false> {
+    const rutaDocumentoPersona = path.join(__dirname, llaves.carpetaDocumentoSolicitud);
+    let res = await this.StoreFileToPath(rutaDocumentoPersona, llaves.nombreCampoDocumentoProponente, request, response, llaves.extensionesPermitidasDOC);
+    if (res) {
+      const nombre_archivo = response.req?.file?.filename;
+      if (nombre_archivo) {
+        return {filename: nombre_archivo};
+      }
+    }
+    return res;
+  }
+
   /**
    * Return a config for multer storage
    * @param path

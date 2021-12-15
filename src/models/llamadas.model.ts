@@ -11,7 +11,7 @@ export class Llamadas extends Entity {
   id?: number;
 
   @property({
-    type: 'date',
+    type: 'string',
     required: true,
   })
   fecha: string;

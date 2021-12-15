@@ -1,4 +1,5 @@
 import {belongsTo, Entity, model, property} from '@loopback/repository';
+import {generateKeyPair, generateKeyPairSync} from 'crypto';
 import {Jurado} from './jurado.model';
 import {Solicitud} from './solicitud.model';
 
@@ -31,18 +32,18 @@ export class Evaluacionsolicitud extends Entity {
 
   @property({
     type: 'string',
-    required: true,
+    required: false,
   })
   respuesta: string;
 
   @property({
-    type: 'date',
+    type: 'string',
     required: true,
   })
   fecha_invitacion: string;
 
   @property({
-    type: 'date',
+    type: 'string',
     required: true,
   })
   fecha_resultado: string;
@@ -52,6 +53,12 @@ export class Evaluacionsolicitud extends Entity {
     required: true,
   })
   observaciones: string;
+
+  @property({
+    type: 'string',
+    required: true,
+  })
+  Hash:string;
 
   @belongsTo(() => Jurado, {name: 'tiene_jurado'})
   id_jurado: number;
