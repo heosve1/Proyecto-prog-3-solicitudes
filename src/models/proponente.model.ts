@@ -1,7 +1,7 @@
-import {belongsTo, Entity, hasOne, model, property, hasMany} from '@loopback/repository';
+import {belongsTo, Entity, hasMany, hasOne, model, property} from '@loopback/repository';
+import {Foto} from './foto.model';
 import {Tipovinculacion} from './tipovinculacion.model';
 import {Usuarioproponente} from './usuarioproponente.model';
-import {Foto} from './foto.model';
 
 @model({
   settings: {
@@ -30,8 +30,7 @@ export class Proponente extends Entity {
   primer_nombre: string;
 
   @property({
-    type: 'string',
-    required: true,
+    type: 'string'
   })
   segundo_nombre: string;
 
@@ -43,7 +42,6 @@ export class Proponente extends Entity {
 
   @property({
     type: 'string',
-    required: true,
   })
   segundo_apellido: string;
 

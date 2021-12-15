@@ -51,7 +51,7 @@ export class Solicitud extends Entity {
   nombre_trabajo: string;
 
   @property({
-    type: 'date',
+    type: 'string',
     required: true,
   })
   fecha: string;
