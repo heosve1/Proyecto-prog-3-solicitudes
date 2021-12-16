@@ -52,18 +52,18 @@ export class EvaluacionSolicitudController {
   ): Promise<Evaluacionsolicitud> {
     let jurado = await this.juradoRepository.findById(evaluacionsolicitud.id_jurado);
     let solicitud = await this.solicitudRepository.findById(evaluacionsolicitud.id_solicitud);
-    if (jurado && solicitud) {
-      let notificacion = new NotificacionCorreo();
-      notificacion.destinatario = jurado.correo;
-      notificacion.asunto = "Invitación Solicitud";
-      notificacion.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Se te ha hecho la solicitud de evaluar el trabajo <strong>${solicitud.nombre_trabajo}</strong>. <br /> Para aceptar evaluar este trabajo, ingresa al siguiente link: <a href="http://localhost:4200/home">Aceptar</a><br />Si deseas rechazar la evaluación, ingresa al siguiente link: <a href="https://tenor.com/view/shitpost-gun-gif-21896048">Rechazar</a> <br />Fecha:${solicitud.fecha}`
-      this.servicioNotificaciones.EnviarCorreo(notificacion)
-      console.log("Se ha notificado al usuario con exito")
-    }
     if (evaluacionsolicitud.Hash == "") {
       let createHash = require('hash-generator');
       evaluacionsolicitud.Hash = createHash(33)
       console.log(evaluacionsolicitud.Hash)
+    }
+    if (jurado && solicitud) {
+      let notificacion = new NotificacionCorreo();
+      notificacion.destinatario = jurado.correo;
+      notificacion.asunto = "Invitación Solicitud";
+      notificacion.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Se te ha hecho la solicitud de evaluar el trabajo <strong>${solicitud.nombre_trabajo}</strong>. <br /> Para aceptar evaluar este trabajo, ingresa al siguiente link: <a href="http://localhost:4200/resultado-solicitud/${evaluacionsolicitud.Hash}">Aceptar</a><br />Si deseas rechazar la evaluación, ingresa al siguiente link: <a href="https://tenor.com/view/shitpost-gun-gif-21896048">Rechazar</a> <br />Fecha:${solicitud.fecha}`
+      this.servicioNotificaciones.EnviarCorreo(notificacion)
+      console.log("Se ha notificado al usuario con exito")
     }
     return this.evaluacionsolicitudRepository.create(evaluacionsolicitud);
   }
@@ -135,6 +135,35 @@ export class EvaluacionSolicitudController {
     return this.evaluacionsolicitudRepository.findById(id, filter);
   }
 
+
+  @get('/respuestas-solicitud-hash/{id}')
+  @response(200, {
+    description: 'Evaluacionsolicitud model instance',
+    content: {
+      'application/json': {
+        schema: getModelSchemaRef(Evaluacionsolicitud, {includeRelations: true}),
+      },
+    },
+  })
+  async findByHash(
+    @param.path.string('id') hash: string,
+
+    @param.filter(Evaluacionsolicitud, {exclude: 'where'}) filter?: FilterExcludingWhere<Evaluacionsolicitud>
+  ): Promise<Evaluacionsolicitud | null> {
+    let evaluacionTemporal = await this.evaluacionsolicitudRepository.findOne({
+      where: {
+        Hash: hash
+      }
+    });
+
+    if (evaluacionTemporal) {
+      return evaluacionTemporal
+    } else {
+      return null;
+    }
+  }
+
+
   @patch('/evaluacionsolicitudes/{id}')
   @response(204, {
     description: 'Evaluacionsolicitud PATCH success',
@@ -205,6 +234,8 @@ export class EvaluacionSolicitudController {
 
   }
 
+
+
   @put('/evaluacionsolicitudes/{id}')
   @response(204, {
     description: 'Evaluacionsolicitud PUT success',
@@ -215,6 +246,77 @@ export class EvaluacionSolicitudController {
   ): Promise<void> {
     await this.evaluacionsolicitudRepository.replaceById(id, evaluacionsolicitud);
   }
+
+
+
+  @put('/put-respuestasolicitud/{id}')
+  @response(204, {
+    description: 'Evaluacionsolicitud PUT success',
+  })
+  async replaceByHash(
+    @param.path.string('id') hash: string,
+    @requestBody() evaluacionsolicitud: Evaluacionsolicitud,
+  ): Promise<void> {
+
+    let busquedaput = await this.evaluacionsolicitudRepository.findOne({
+      where: {
+        Hash: hash
+      }
+    });
+
+    await this.evaluacionsolicitudRepository.replaceById(busquedaput?.id, evaluacionsolicitud);
+
+    let evaluacionsolicitud1 = await this.evaluacionsolicitudRepository.findById(busquedaput?.id)
+    let respuestaAntigua = "En proceso..."
+    let respuestaNueva = evaluacionsolicitud1.respuesta
+    let jurado = await this.juradoRepository.findById(evaluacionsolicitud1.id_jurado);
+    let solicitud = await this.solicitudRepository.findById(evaluacionsolicitud1.id_solicitud);
+    let proponente = await this.proponenteRepository.findById(solicitud.id_proponente);
+
+    if (respuestaAntigua == "En proceso..." && respuestaNueva == "Aceptado") {
+
+      if (jurado && solicitud && proponente) {
+
+        let notificacionJurado = new NotificacionCorreo();
+        notificacionJurado.destinatario = jurado.correo;
+        notificacionJurado.asunto = "Evaluacion Solicitud";
+        notificacionJurado.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Has aceptado evaluar la solicitud del trabajo <strong>${solicitud.nombre_trabajo}</strong>, a nombre de ${proponente.primer_nombre} ${proponente.primer_apellido}. <br /> Para ir a la pagina de evaluacion, ingresa al siguiente link: <a href="https://tenor.com/view/bob-esponja-dancando-mt-gif-19768741">Evaluar</a><br /><br />Fecha:${evaluacionsolicitud.fecha_resultado}`
+        this.servicioNotificaciones.EnviarCorreo(notificacionJurado)
+        console.log("Se ha notificado al jurado con exito")
+
+        let notificacionProponente = new NotificacionCorreo();
+        notificacionProponente.destinatario = jurado.correo;
+        notificacionProponente.asunto = "Solicitud Aceptada";
+        notificacionProponente.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${proponente.primer_nombre}</h1></strong><br /> Tu solicitud <strong>${solicitud.nombre_trabajo}</strong>,ha sido aceptada y sera evaluada por el jurado ${jurado.nombre} ${jurado.apellidos}.<br /> Se te notificara del proceso de evaluacion proximamente.`
+        this.servicioNotificaciones.EnviarCorreo(notificacionProponente)
+        console.log("Se ha notificado al proponente con exito")
+      }
+
+    }
+
+    if (respuestaAntigua == "En proceso..." && respuestaNueva == "Rechazado") {
+
+      if (jurado && solicitud && proponente) {
+
+        let notificacionJurado = new NotificacionCorreo();
+        notificacionJurado.destinatario = jurado.correo;
+        notificacionJurado.asunto = "Evaluacion Solicitud";
+        notificacionJurado.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${jurado.nombre}</h1></strong><br /> Has rechazado evaluar la solicitud del trabajo <strong>${solicitud.nombre_trabajo}</strong>, a nombre de ${proponente.primer_nombre} ${proponente.primer_apellido}. <br /> Lamentamos que no puedieras evaluar esta solicitud, esperamos encarecidamente que nos ayudes a evaluar futuras solicitudes.`
+        this.servicioNotificaciones.EnviarCorreo(notificacionJurado)
+        console.log("Se ha notificado al jurado con exito")
+
+        let notificacionProponente = new NotificacionCorreo();
+        notificacionProponente.destinatario = jurado.correo;
+        notificacionProponente.asunto = "Solicitud Rechazada";
+        notificacionProponente.mensaje = `<strong><h1 style = "font-size:150%;">Hola ${proponente.primer_nombre}</h1></strong><br /> Tu solicitud <strong>${solicitud.nombre_trabajo}</strong>,fue rechazada por el jurado ${jurado.nombre} ${jurado.apellidos}.<br /> Se te notificara del proceso de evaluacion proximamente.`
+        this.servicioNotificaciones.EnviarCorreo(notificacionProponente)
+        console.log("Se ha notificado al proponente con exito")
+      }
+
+    }
+
+  }
+
 
   @del('/evaluacionsolicitudes/{id}')
   @response(204, {
